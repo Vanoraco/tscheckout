@@ -276,10 +276,10 @@ export default function StripeCheckout() {
         fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
         backgroundColor: settings.backgroundColor
       }}>
-        <div className="max-w-md w-full mx-4 bg-white rounded-lg shadow-lg p-8 text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-          <p className="text-gray-600 mb-6">Thank you for your purchase from {settings.storeName}</p>
+        <div className="max-w-md w-full mx-4 bg-white rounded-lg shadow-lg p-6 sm:p-8 text-center">
+          <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 mx-auto mb-4" />
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
+          <p className="text-gray-600 mb-6 text-sm sm:text-base">Thank you for your purchase from {settings.storeName}</p>
 
           <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
             <h3 className="font-semibold text-gray-900 mb-3">Order Details</h3>
@@ -331,29 +331,30 @@ export default function StripeCheckout() {
       <div className="absolute top-4 left-4 z-10">
         <Link
           to="/dashboard"
-          className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-2 rounded-md hover:bg-white transition-colors shadow-sm border"
+          className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-700 px-2 sm:px-3 py-2 rounded-md hover:bg-white transition-colors shadow-sm border text-sm"
         >
           <Settings className="w-4 h-4" />
-          Dashboard
+          <span className="hidden sm:inline">Dashboard</span>
+          <span className="sm:hidden">Menu</span>
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 min-h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
         {/* Left Column - Product Info */}
-        <div className="px-20 pt-[60px] flex flex-col items-center relative" style={{ backgroundColor: settings.backgroundColor }}>
-          {/* Concave shadow effect */}
-          <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-gray-100/30 to-transparent"></div>
-          <div className="max-w-xs w-full text-center">
+        <div className="px-4 sm:px-8 lg:px-20 pt-8 lg:pt-[60px] flex flex-col items-center relative order-1 lg:order-1" style={{ backgroundColor: settings.backgroundColor }}>
+          {/* Concave shadow effect - only on desktop */}
+          <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-gray-100/30 to-transparent"></div>
+          <div className="max-w-sm lg:max-w-xs w-full text-center">
             {/* Header */}
-            <div className="flex items-center justify-center mb-[45px]">
-              <Store className="w-6 h-6 text-gray-600 mr-3" />
-              <span className="text-lg font-medium text-gray-700">{settings.storeName}</span>
+            <div className="flex items-center justify-center mb-8 lg:mb-[45px]">
+              <Store className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 mr-2 sm:mr-3" />
+              <span className="text-base sm:text-lg font-medium text-gray-700">{settings.storeName}</span>
             </div>
 
             {/* Product Details */}
             <div>
-              <h1 className="text-xl text-gray-500 mb-3 font-normal">Product Title</h1>
-              <div className="text-3xl font-bold text-gray-900 mb-4">
+              <h1 className="text-lg sm:text-xl text-gray-500 mb-3 font-normal">Product Title</h1>
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                 ${settings.productPrice.toFixed(2)}
               </div>
               <p className="text-gray-500 text-base">Product Description</p>
@@ -362,12 +363,12 @@ export default function StripeCheckout() {
         </div>
 
         {/* Right Column - Checkout Form */}
-        <div className="px-20 py-6 flex items-start justify-center" style={{ backgroundColor: settings.backgroundColor }}>
-          <div className="w-full max-w-sm pt-1">
+        <div className="px-4 sm:px-8 lg:px-20 py-6 lg:py-6 flex items-start justify-center order-2 lg:order-2" style={{ backgroundColor: settings.backgroundColor }}>
+          <div className="w-full max-w-md sm:max-w-sm lg:pt-1">
             {/* Contact Information */}
-            <div className="mb-4">
+            <div className="mb-4 overflow-visible">
               <h2 className="text-lg font-medium text-gray-900 mb-3">Contact information</h2>
-              <div className="space-y-0">
+              <div className="space-y-0 overflow-visible">
                 <div>
                   <Label htmlFor="email" className="text-sm text-gray-600 mb-2 block font-normal">
                     Contact information
@@ -388,7 +389,7 @@ export default function StripeCheckout() {
                   </div>
                 </div>
 
-                <div className="relative">
+                <div className="relative overflow-visible">
                   <div
                     className="absolute left-4 top-1/2 transform -translate-y-1/2 cursor-pointer z-20 w-4 h-4 flex items-center justify-center"
                     onClick={() => setShowCountryDropdown(!showCountryDropdown)}
@@ -398,16 +399,16 @@ export default function StripeCheckout() {
 
                   {/* Country Dropdown */}
                   {showCountryDropdown && (
-                    <div className="absolute left-0 top-full mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
                       {countries.map((countryOption) => (
                         <div
                           key={countryOption.code}
-                          className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                          className="flex items-center px-1 py-1.5 hover:bg-gray-50 cursor-pointer text-xs"
                           onClick={() => handleCountrySelect(countryOption)}
                         >
-                          <FlagIcon countryCode={countryOption.code} className="mr-3" />
-                          <span className="text-sm text-gray-700 mr-2">{countryOption.name}</span>
-                          <span className="text-sm text-gray-500 ml-auto">{countryOption.prefix}</span>
+                          <FlagIcon countryCode={countryOption.code} className="mr-1 flex-shrink-0 w-3 h-3" />
+                          <span className="text-gray-700 mr-1 truncate flex-1 min-w-0">{countryOption.name}</span>
+                          <span className="text-gray-500 flex-shrink-0 text-xs">{countryOption.prefix}</span>
                         </div>
                       ))}
                     </div>

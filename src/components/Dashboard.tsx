@@ -51,21 +51,21 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <Store className="w-6 h-6" />
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <Store className="w-5 h-5 sm:w-6 sm:h-6" />
                 Store Dashboard
               </h1>
-              <p className="text-gray-600 mt-1">Manage your store settings and appearance</p>
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage your store settings and appearance</p>
             </div>
-            <Link 
+            <Link
               to="/checkout"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base self-start sm:self-auto"
             >
               View Checkout
               <ArrowRight className="w-4 h-4" />
@@ -74,8 +74,8 @@ export default function Dashboard() {
         </div>
 
         {/* Settings Form */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Store Settings</h2>
+        <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Store Settings</h2>
           
           <div className="space-y-6">
             {/* Store Name */}
@@ -126,7 +126,7 @@ export default function Dashboard() {
               </Label>
               
               {/* Color Picker Grid */}
-              <div className="grid grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {predefinedColors.map((color) => (
                   <button
                     key={color.value}
