@@ -90,33 +90,6 @@ app.post('/api/create-checkout-session', async (req, res) => {
   }
 });
 
-// Retrieve Stripe Checkout Session (for success page)
-app.get('/api/checkout-session/:sessionId', async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    
-    const session = await stripeClient.checkout.sessions.retrieve(sessionId, {
-      expand: ['line_items', 'payment_intent']
-    });
-
-    res.json({
-      id: session.id,
-      amount_total: session.amount_total,
-      currency: session.currency,
-      customer_email: session.customer_email,
-      payment_status: session.payment_status,
-      metadata: session.metadata,
-      line_items: session.line_items,
-      payment_intent: session.payment_intent
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to retrieve checkout session',
-      details: error.message
-    });
-  }
-});
 
 // Webhook endpoint for Stripe events 
 app.post('/api/webhook', express.raw({type: 'application/json'}), (req, res) => {

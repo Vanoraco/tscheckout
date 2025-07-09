@@ -47,7 +47,8 @@ export default function StripeCheckoutSimple() {
 
     try {
       // Call our backend API to create a Stripe Checkout Session
-      const response = await fetch('http://localhost:3001/api/create-checkout-session', {
+      const apiUrl = import.meta.env.MODE === 'production' ? '/api/create-checkout-session' : 'http://localhost:3001/api/create-checkout-session'
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
