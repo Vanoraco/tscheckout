@@ -18,7 +18,6 @@ export default function StripeCheckoutSimple() {
   const urlParams = new URLSearchParams(window.location.search)
   const isSuccess = urlParams.get('success') === 'true'
   const isCanceled = urlParams.get('canceled') === 'true'
-  const sessionId = urlParams.get('session_id')
 
   const [paymentSuccess] = useState(isSuccess)
   const [paymentError, setPaymentError] = useState<string | null>(
@@ -46,9 +45,12 @@ export default function StripeCheckoutSimple() {
     setPaymentError(null)
 
     try {
-      // Call our backend API to create a Stripe Checkout Session
-      const apiUrl = import.meta.env.MODE === 'production' ? '/api/create-checkout-session' : 'http://localhost:3001/api/create-checkout-session'
-      const response = await fetch(apiUrl, {
+      // Call our API to create a Stripe Checkout Session
+      // In development, use localhost server; in production, use Vercel serverless function
+      const endpoint = import.meta.env.MODE === 'development'
+        ? 'http://localhost:3001/api/create-checkout-session'
+        : '/api/create-checkout-session'
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +111,7 @@ export default function StripeCheckoutSimple() {
               </div>
               <div className="flex justify-between">
                 <span>Order ID:</span>
-                <span className="font-mono text-xs">{sessionId || `ORDER-${Date.now()}`}</span>
+                <span className="font-mono text-xs">{`ORDER-${Date.now()}`}</span>
               </div>
               <div className="flex justify-between">
                 <span>Status:</span>

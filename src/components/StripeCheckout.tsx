@@ -204,8 +204,12 @@ export default function StripeCheckout() {
     setPaymentError(null)
 
     try {
-      // Call our backend API to create a Stripe Checkout Session
-      const response = await fetch('http://localhost:3001/api/create-checkout-session', {
+      // Call our API to create a Stripe Checkout Session
+      // In development, use localhost server; in production, use Vercel serverless function
+      const endpoint = import.meta.env.MODE === 'development'
+        ? 'http://localhost:3001/api/create-checkout-session'
+        : '/api/create-checkout-session'
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

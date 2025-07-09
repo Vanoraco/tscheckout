@@ -63,7 +63,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: successUrl || `${req.headers.origin}/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: successUrl || `${req.headers.origin}/checkout?success=true`,
       cancel_url: cancelUrl || `${req.headers.origin}/checkout?canceled=true`,
       customer_email: customerEmail || undefined,
       billing_address_collection: 'required',
