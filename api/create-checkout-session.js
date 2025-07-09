@@ -1,13 +1,22 @@
-const stripe = require('stripe');
-
-// Initialize Stripe with your secret key
-const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
+const Stripe = require('stripe');
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  try {
+    // Check if Stripe secret key is available
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY is not set');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    // Initialize Stripe with your secret key
+    const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2023-10-16',
+    });
+
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -68,10 +77,17 @@ export default async function handler(req, res) {
       url: session.url 
     });
 
+    } catch (error) {
+      console.error('Stripe error:', error);
+      res.status(500).json({
+        error: 'Failed to create checkout session',
+        details: error.message
+      });
+    }
   } catch (error) {
-    console.error('Stripe error:', error);
+    console.error('Function error:', error);
     res.status(500).json({
-      error: 'Failed to create checkout session',
+      error: 'Internal server error',
       details: error.message
     });
   }
