@@ -1,24 +1,29 @@
 {
+  "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "functions": {
-    "server/server.cjs": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "server/server.cjs",
+      "use": "@vercel/node"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/server.cjs"
+      "src": "/api/(.*)",
+      "dest": "/server/server.cjs"
     },
     {
-      "source": "/health",
-      "destination": "/server/server.cjs"
+      "src": "/health",
+      "dest": "/server/server.cjs"
     },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
