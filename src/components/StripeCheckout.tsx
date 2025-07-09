@@ -1,12 +1,14 @@
 import type React from "react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { useStripe } from '@stripe/react-stripe-js'
 import { useStore } from "../contexts/StoreContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Mail, Info, Lock, ChevronDown, Settings, Store, CheckCircle, Loader2, AlertCircle } from "lucide-react"
+import { formatCardNumber, formatExpiry, validateCardNumber } from "@/lib/stripe"
 
 // Flag component using flag-icons library for professional flag icons
 const FlagIcon = ({ countryCode, className = "" }: { countryCode: string; className?: string }) => {
@@ -47,6 +49,7 @@ const countries = [
 ]
 
 export default function StripeCheckout() {
+  const stripe = useStripe()
   const { settings } = useStore()
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
@@ -81,9 +84,9 @@ export default function StripeCheckout() {
     return null
   }
 
-  const validateCardNumber = (value: string) => {
+  const validateCardNumberLocal = (value: string) => {
     if (!value) return "Card number is required"
-    if (!/^\d{4} \d{4} \d{4} \d{4}$/.test(value)) return "Invalid card number format"
+    if (!validateCardNumber(value)) return "Invalid card number"
     return null
   }
 
@@ -140,22 +143,7 @@ export default function StripeCheckout() {
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCardNumber(e.target.value)
     setCardNumber(formatted)
-    setCardNumberError(validateCardNumber(formatted))
-  }
-
-  const formatExpiry = (value: string) => {
-    // Remove all non-digits
-    const v = value.replace(/\D/g, "")
-
-    // Limit to 4 digits (MMYY)
-    const limited = v.substring(0, 4)
-
-    // Add slash after MM
-    if (limited.length >= 2) {
-      return limited.substring(0, 2) + " / " + limited.substring(2)
-    }
-
-    return limited
+    setCardNumberError(validateCardNumberLocal(formatted))
   }
 
   const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,30 +181,22 @@ export default function StripeCheckout() {
     setPhone("")
   }
 
-  const validateForm = () => {
-    setEmailError(validateEmail(email))
-    setPhoneError(validatePhone(phone))
-    setCardNumberError(validateCardNumber(cardNumber))
-    setExpiryError(validateExpiry(expiry))
-    setCvcError(validateCvc(cvc))
-    setCardholderNameError(validateCardholderName(cardholderName))
 
-    return !(
-      validateEmail(email) ||
-      validatePhone(phone) ||
-      validateCardNumber(cardNumber) ||
-      validateExpiry(expiry) ||
-      validateCvc(cvc) ||
-      validateCardholderName(cardholderName)
-    )
-  }
+
+  // Check URL parameters for success/cancel states
+  const urlParams = new URLSearchParams(window.location.search)
+  const isSuccess = urlParams.get('success') === 'true'
+  const isCanceled = urlParams.get('canceled') === 'true'
 
   const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [paymentSuccess, setPaymentSuccess] = useState(isSuccess)
+  const [paymentError, setPaymentError] = useState<string | null>(
+    isCanceled ? 'Payment was canceled. You can try again.' : null
+  )
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
+    if (!stripe) {
+      setPaymentError('Stripe has not loaded yet. Please try again.')
       return
     }
 
@@ -224,49 +204,45 @@ export default function StripeCheckout() {
     setPaymentError(null)
 
     try {
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // Simulate payment success (90% success rate for demo)
-      const isSuccess = Math.random() > 0.1
-
-      if (isSuccess) {
-        setPaymentSuccess(true)
-        // Save order details to localStorage for demo
-        const orderDetails = {
-          orderId: `ORDER-${Date.now()}`,
-          email,
-          phone: `${selectedPhoneCountry.prefix} ${phone}`,
+      // Call our backend API to create a Stripe Checkout Session
+      const response = await fetch('http://localhost:3001/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           amount: settings.productPrice,
-          cardLast4: cardNumber.slice(-4),
-          timestamp: new Date().toISOString(),
-          storeName: settings.storeName
-        }
-        localStorage.setItem('lastOrder', JSON.stringify(orderDetails))
-      } else {
-        throw new Error('Payment declined. Please try a different card.')
+          currency: 'usd',
+          productName: settings.storeName,
+          customerEmail: email || undefined,
+          successUrl: `${window.location.origin}/checkout?success=true`,
+          cancelUrl: `${window.location.origin}/checkout?canceled=true`,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create checkout session')
+      }
+
+      const { sessionId } = await response.json()
+
+      // Redirect to Stripe Checkout
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: sessionId
+      })
+
+      if (error) {
+        throw new Error(error.message || 'Failed to redirect to checkout')
       }
     } catch (error) {
-      setPaymentError(error instanceof Error ? error.message : 'Payment failed. Please try again.')
-    } finally {
+      console.error('Checkout error:', error)
+      setPaymentError(error instanceof Error ? error.message : 'Failed to start checkout process.')
       setIsProcessing(false)
     }
   }
 
-  const isFormValid = !!(
-    email &&
-    phone &&
-    cardNumber &&
-    expiry &&
-    cvc &&
-    cardholderName &&
-    !validateEmail(email) &&
-    !validatePhone(phone) &&
-    !validateCardNumber(cardNumber) &&
-    !validateExpiry(expiry) &&
-    !validateCvc(cvc) &&
-    !validateCardholderName(cardholderName)
-  )
+  const isFormValid = !!(email && !validateEmail(email))
 
   // Success Screen
   if (paymentSuccess) {
@@ -573,6 +549,19 @@ export default function StripeCheckout() {
                 `Pay $${settings.productPrice.toFixed(2)}`
               )}
             </Button>
+
+            {/* Test Cards Info */}
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <h3 className="text-sm font-medium text-blue-900 mb-2">🧪 Test Cards (Sandbox Mode)</h3>
+              <div className="text-xs text-blue-800 space-y-1">
+                <div><strong>Success:</strong> 4242 4242 4242 4242</div>
+                <div><strong>Declined:</strong> 4000 0000 0000 0002</div>
+                <div><strong>Insufficient Funds:</strong> 4000 0000 0000 9995</div>
+                <div><strong>Expired:</strong> 4000 0000 0000 0069</div>
+                <div><strong>Incorrect CVC:</strong> 4000 0000 0000 0127</div>
+                <div className="text-blue-600 mt-1">Use any future expiry date and any 3-digit CVC</div>
+              </div>
+            </div>
 
             {/* Footer */}
             <div className="text-center text-xs text-gray-500">

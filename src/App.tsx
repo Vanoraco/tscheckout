@@ -1,8 +1,10 @@
 
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { Elements } from '@stripe/react-stripe-js'
 import { StoreProvider, useStore } from './contexts/StoreContext'
-import StripeCheckout from './components/StripeCheckout'
+import StripeCheckoutSimple from './components/StripeCheckoutSimple'
+import { stripePromise } from './lib/stripe'
 
 // Dashboard component with store context
 function Dashboard() {
@@ -246,9 +248,13 @@ function Dashboard() {
   )
 }
 
-// Checkout wrapper that uses the original component
+// Checkout wrapper that uses Stripe Elements
 function Checkout() {
-  return <StripeCheckout />
+  return (
+    <Elements stripe={stripePromise}>
+      <StripeCheckoutSimple />
+    </Elements>
+  )
 }
 
 function App() {
