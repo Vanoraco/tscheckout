@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Mail, Info, Lock, ChevronDown, Settings, Store, CheckCircle, Loader2, AlertCircle } from "lucide-react"
-import { formatCardNumber, formatExpiry, validateCardNumber } from "@/lib/stripe"
+import { formatExpiry, validateCardNumber } from "@/lib/stripe"
 
 // Flag component using flag-icons library for professional flag icons
 const FlagIcon = ({ countryCode, className = "" }: { countryCode: string; className?: string }) => {
