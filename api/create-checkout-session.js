@@ -1,6 +1,6 @@
-const Stripe = require('stripe');
+import Stripe from 'stripe';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   try {
     // Check if Stripe secret key is available
     if (!process.env.STRIPE_SECRET_KEY) {
@@ -91,4 +91,4 @@ module.exports = async function handler(req, res) {
       details: error.message
     });
   }
-};
+}
